@@ -76,6 +76,19 @@ void setup() {
     Logger::log("Requested communication cycle period");
     delay(100);
 
+    // Motor Data (Object 6410h)
+    CANController::requestSDO(NODE_ID, 0x6410, 0x00); // Number of entries
+    Logger::log("Requested number of entries in motor data");
+    delay(100);
+
+    // For simplicity, we will just request the first few sub-indices
+    // In a real implementation, you may want to loop through all available sub-indices dynamically
+    for (uint8_t subIndex = 1; subIndex <= 5; subIndex++) {
+        CANController::requestSDO(NODE_ID, 0x6410, subIndex);
+        Logger::log("Requested motor data, sub-index " + String(subIndex));
+        delay(100);
+    }
+
     // Finalize log
     Logger::saveLog();
     Logger::log("Log saved. Diagnostics complete.");
