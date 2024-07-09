@@ -1,12 +1,11 @@
 #include "Logger.h"
-#include <SD.h>
 
-File logFile;
+File Logger::logFile;
 
 void Logger::init() {
     Serial.begin(9600);
     if (!SD.begin(BUILTIN_SDCARD)) {
-        Serial.println("Initialization failed!");
+        Serial.println("SD card initialization failed!");
         return;
     }
     logFile = SD.open("log.txt", FILE_WRITE);
