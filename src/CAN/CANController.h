@@ -13,10 +13,12 @@ public:
     static void writeEMCY(uint8_t nodeId, uint16_t errorCode, uint8_t errorRegister);
     static void readEMCY(uint8_t nodeId);
     static void writeNMT(uint8_t nodeId, uint8_t command);
-    static void readNMT(uint8_t nodeId);
     static void writeHeartbeat(uint8_t nodeId, uint16_t producerTime);
     static void readHeartbeat(uint8_t nodeId);
     static void dispatchMessages();
+private:
+    static void logMessage(const char* action, const CANFDMessage& message);
+    static int32_t receivedValue;
 };
 
 #endif

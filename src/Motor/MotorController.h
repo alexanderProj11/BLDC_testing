@@ -1,3 +1,5 @@
+// MotorController.h
+
 #ifndef MOTORCONTROLLER_H
 #define MOTORCONTROLLER_H
 
@@ -18,6 +20,8 @@ public:
     static void setOperationMode(uint8_t nodeId, int8_t mode);
     static int8_t getOperationMode(uint8_t nodeId);
     static void faultReset(uint8_t nodeId);
+private:
+    static bool waitForStatus(uint8_t nodeId, uint16_t statusMask, uint16_t expectedStatus, uint32_t timeout);
 };
 
 #endif

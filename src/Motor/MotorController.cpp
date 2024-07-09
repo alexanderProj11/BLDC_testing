@@ -21,10 +21,29 @@
 #define QUICK_STOP_COMMAND 0x02
 #define FAULT_RESET_COMMAND 0x80
 
+// Statusword bits
+#define STATUS_OPERATION_ENABLE 0x0027
+#define STATUS_SWITCHED_ON 0x0021
+#define STATUS_READY_TO_SWITCH_ON 0x0020
+#define STATUS_FAULT 0x0008
+#define STATUS_FAULT_REACTION_ACTIVE 0x004F
+
 void MotorController::init(uint8_t nodeId) {
-    Logger::log("Motor initialized for Node ID: " + String(nodeId));
-    // Set initial controlword to Shutdown command
+    Logger::log("Initializing motor for Node ID: " + String(nodeId));
     setControlword(nodeId, SHUTDOWN_COMMAND);
+    if (!waitForStatus(nodeId, 0x006F, STATUS_READY_TO_SWITCH_ON, 1000)) {
+        Logger::log("Failed to transition to READY_TO_SWITCH_ON for Node ID: " + String(nodeId));
+        return;
+    }
+    setControlword(nodeId, SWITCH_ON_COMMAND);
+    if (!waitForStatus(nodeId, 0x006F, STATUS_SWITCHED_ON, 1000)) {
+        Logger::log("Failed to transition to SWITCHED_ON for Node ID: " + String(nodeId));
+        return;
+    }
+    setControlword(nodeId, ENABLE_OPERATION_COMMAND);
+    if (!waitForStatus(nodeId, 0x006F, STATUS_OPERATION_ENABLE, 1000)) {
+        Logger::log("Failed to transition to OPERATION_ENABLE for Node ID: " + String(nodeId));
+    }
 }
 
 void MotorController::setVelocity(uint8_t nodeId, int32_t velocity) {
@@ -52,9 +71,7 @@ void MotorController::moveToPosition(uint8_t nodeId, int32_t currentAngle, int32
     setAcceleration(nodeId, maxSpeed / 2);
     setDeceleration(nodeId, maxSpeed / 2);
     setTargetPosition(nodeId, targetPosition);
-
-    // Set controlword to start movement
-    setControlword(nodeId, 0x3F); // Assuming the controlword to start motion
+    setControlword(nodeId, 0x3F); // Assuming 0x3F starts motion
     Logger::log("Started move to position for Node ID: " + String(nodeId) + ", Target Position: " + String(targetPosition));
 }
 
@@ -88,5 +105,20 @@ int8_t MotorController::getOperationMode(uint8_t nodeId) {
 
 void MotorController::faultReset(uint8_t nodeId) {
     setControlword(nodeId, FAULT_RESET_COMMAND);
+    if (!waitForStatus(nodeId, 0x004F, 0x0000, 1000)) { // Wait for fault reset
+        Logger::log("Failed to reset fault for Node ID: " + String(nodeId));
+    }
     Logger::log("Fault reset for Node ID: " + String(nodeId));
+}
+
+bool MotorController::waitForStatus(uint8_t nodeId, uint16_t statusMask, uint16_t expectedStatus, uint32_t timeout) {
+    uint32_t startTime = millis();
+    while (millis() - startTime < timeout) {
+        uint16_t statusword = getStatusword(nodeId);
+        if ((statusword & statusMask) == expectedStatus) {
+            return true;
+        }
+        delay(10); // Small delay to prevent bus overload
+    }
+    return false;
 }
