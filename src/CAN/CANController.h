@@ -17,7 +17,7 @@ public:
     static void readHeartbeat(uint8_t nodeId);
     static void dispatchMessages();
 private:
-    static void logMessage(const char* action, const CANFDMessage& message);
+    static void logMessage(const char* action, const CANMessage& message);
     static int32_t receivedValue;
 };
 

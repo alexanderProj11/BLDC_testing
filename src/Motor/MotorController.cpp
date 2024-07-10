@@ -29,41 +29,41 @@
 #define STATUS_FAULT_REACTION_ACTIVE 0x004F
 
 void MotorController::init(uint8_t nodeId) {
-    Logger::log("Initializing motor for Node ID: " + String(nodeId));
+    Logger::log(("Initializing motor for Node ID: " + String(nodeId)).c_str());
     setControlword(nodeId, SHUTDOWN_COMMAND);
     if (!waitForStatus(nodeId, 0x006F, STATUS_READY_TO_SWITCH_ON, 1000)) {
-        Logger::log("Failed to transition to READY_TO_SWITCH_ON for Node ID: " + String(nodeId));
+        Logger::log(("Failed to transition to READY_TO_SWITCH_ON for Node ID: " + String(nodeId)).c_str());
         return;
     }
     setControlword(nodeId, SWITCH_ON_COMMAND);
     if (!waitForStatus(nodeId, 0x006F, STATUS_SWITCHED_ON, 1000)) {
-        Logger::log("Failed to transition to SWITCHED_ON for Node ID: " + String(nodeId));
+        Logger::log(("Failed to transition to SWITCHED_ON for Node ID: " + String(nodeId)).c_str());
         return;
     }
     setControlword(nodeId, ENABLE_OPERATION_COMMAND);
     if (!waitForStatus(nodeId, 0x006F, STATUS_OPERATION_ENABLE, 1000)) {
-        Logger::log("Failed to transition to OPERATION_ENABLE for Node ID: " + String(nodeId));
+        Logger::log(("Failed to transition to OPERATION_ENABLE for Node ID: " + String(nodeId)).c_str());
     }
 }
 
 void MotorController::setVelocity(uint8_t nodeId, int32_t velocity) {
     CANController::writeSDO(nodeId, PROFILE_VELOCITY_INDEX, 0x00, velocity);
-    Logger::log("Set velocity for Node ID: " + String(nodeId) + " to " + String(velocity));
+    Logger::log(("Set velocity for Node ID: " + String(nodeId) + " to " + String(velocity)).c_str());
 }
 
 void MotorController::setAcceleration(uint8_t nodeId, int32_t acceleration) {
     CANController::writeSDO(nodeId, PROFILE_ACCELERATION_INDEX, 0x00, acceleration);
-    Logger::log("Set acceleration for Node ID: " + String(nodeId) + " to " + String(acceleration));
+    Logger::log(("Set acceleration for Node ID: " + String(nodeId) + " to " + String(acceleration)).c_str());
 }
 
 void MotorController::setDeceleration(uint8_t nodeId, int32_t deceleration) {
     CANController::writeSDO(nodeId, PROFILE_DECELERATION_INDEX, 0x00, deceleration);
-    Logger::log("Set deceleration for Node ID: " + String(nodeId) + " to " + String(deceleration));
+    Logger::log(("Set deceleration for Node ID: " + String(nodeId) + " to " + String(deceleration)).c_str());
 }
 
 void MotorController::setTargetPosition(uint8_t nodeId, int32_t position) {
     CANController::writeSDO(nodeId, TARGET_POSITION_INDEX, 0x00, position);
-    Logger::log("Set target position for Node ID: " + String(nodeId) + " to " + String(position));
+    Logger::log(("Set target position for Node ID: " + String(nodeId) + " to " + String(position)).c_str());
 }
 
 void MotorController::moveToPosition(uint8_t nodeId, int32_t currentAngle, int32_t targetPosition, int32_t maxSpeed) {
@@ -72,22 +72,22 @@ void MotorController::moveToPosition(uint8_t nodeId, int32_t currentAngle, int32
     setDeceleration(nodeId, maxSpeed / 2);
     setTargetPosition(nodeId, targetPosition);
     setControlword(nodeId, 0x3F); // Assuming 0x3F starts motion
-    Logger::log("Started move to position for Node ID: " + String(nodeId) + ", Target Position: " + String(targetPosition));
+    Logger::log(("Started move to position for Node ID: " + String(nodeId) + ", Target Position: " + String(targetPosition)).c_str());
 }
 
 void MotorController::monitorHealth(uint8_t nodeId) {
     uint16_t statusword = getStatusword(nodeId);
-    Logger::log("Health status for Node ID: " + String(nodeId) + " is 0x" + String(statusword, HEX));
+    Logger::log(("Health status for Node ID: " + String(nodeId) + " is 0x" + String(statusword, HEX)).c_str());
 }
 
 void MotorController::emergencyStop(uint8_t nodeId) {
     setControlword(nodeId, QUICK_STOP_COMMAND);
-    Logger::log("Emergency stop executed for Node ID: " + String(nodeId));
+    Logger::log(("Emergency stop executed for Node ID: " + String(nodeId)).c_str());
 }
 
 void MotorController::setControlword(uint8_t nodeId, uint16_t controlword) {
     CANController::writeSDO(nodeId, CONTROLWORD_INDEX, 0x00, controlword);
-    Logger::log("Set controlword for Node ID: " + String(nodeId) + " to 0x" + String(controlword, HEX));
+    Logger::log(("Set controlword for Node ID: " + String(nodeId) + " to 0x" + String(controlword, HEX)).c_str());
 }
 
 uint16_t MotorController::getStatusword(uint8_t nodeId) {
@@ -96,7 +96,7 @@ uint16_t MotorController::getStatusword(uint8_t nodeId) {
 
 void MotorController::setOperationMode(uint8_t nodeId, int8_t mode) {
     CANController::writeSDO(nodeId, MODES_OF_OPERATION_INDEX, 0x00, mode);
-    Logger::log("Set operation mode for Node ID: " + String(nodeId) + " to " + String(mode));
+    Logger::log(("Set operation mode for Node ID: " + String(nodeId) + " to " + String(mode)).c_str());
 }
 
 int8_t MotorController::getOperationMode(uint8_t nodeId) {
@@ -106,9 +106,9 @@ int8_t MotorController::getOperationMode(uint8_t nodeId) {
 void MotorController::faultReset(uint8_t nodeId) {
     setControlword(nodeId, FAULT_RESET_COMMAND);
     if (!waitForStatus(nodeId, 0x004F, 0x0000, 1000)) { // Wait for fault reset
-        Logger::log("Failed to reset fault for Node ID: " + String(nodeId));
+        Logger::log(("Failed to reset fault for Node ID: " + String(nodeId)).c_str());
     }
-    Logger::log("Fault reset for Node ID: " + String(nodeId));
+    Logger::log(("Fault reset for Node ID: " + String(nodeId)).c_str());
 }
 
 bool MotorController::waitForStatus(uint8_t nodeId, uint16_t statusMask, uint16_t expectedStatus, uint32_t timeout) {
